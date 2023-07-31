@@ -31,6 +31,13 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+catkin_install_python(PROGRAMS
+  scripts/ddpg_ros.py
+  scripts/ppo_ros.py
+  scripts/ur5e_gym_env.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}_node src/ur5e_interface_node.cpp)
 

@@ -1,7 +1,9 @@
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.vec_env import VecNormalize
+import rospy
 from ur5e_gym_env import UR5eEnv
+
 
 # Instantiate your custom Gym environment
 env = DummyVecEnv([lambda: UR5eEnv()])

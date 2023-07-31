@@ -22,7 +22,7 @@ class UR5eEnv(gym.Env):
         print("Initialized action space.")
 
         # Define observation space: joint states (6) + object position (3)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(9,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(10,), dtype=np.float32)
         print("Initialized observation space.")
 
         # ROS node
@@ -82,17 +82,21 @@ class UR5eEnv(gym.Env):
 
     def get_observation(self):
         print(self.object_position)
+        print(self.joint_states)
         if len(self.joint_states.desired.positions) == 0:
             self.joint_states.desired.positions = [0.0] * 6
-        print(self.joint_states.desired.positions)
-        
-        return np.concatenate((self.joint_states.desired.positions[:7], self.object_position))
+        actual = np.clip(self.joint_states.actual.positions, [-2*np.pi]*6, [2*np.pi]*6)
+        print(actual)
+        in_collision = self.joint_states.desired.positions !=  actual
+        return np.concatenate((self.joint_states.desired.positions, self.object_position, [in_collision]))
 
     def calculate_reward(self, observation):
         # Reward based on distance to the object
         end_effector_position = self.get_end_effector_position()
         dist_to_object = np.linalg.norm(self.object_position - end_effector_position)
-
+        in_collision = observation[-1]
+        if in_collision:
+            return -1e6
         # Huge reward for accomplishing the task
         if dist_to_object < 0.05:  # Assuming 5cm is close enough
             return 1000.0
